@@ -18,7 +18,7 @@ buildscript {
 repositories {
     maven { // The repo from which to get waila
         name "Mobius Repo"
-        url "http://mobiusstrip.eu/maven"
+        url "https://www.mobiusstrip.eu/maven"
     }
     maven { // the repo from which to get NEI and stuff
         name 'CB Repo'

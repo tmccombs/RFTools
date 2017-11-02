@@ -13,6 +13,8 @@ import mcjty.lib.container.InventoryHelper;
 import mcjty.lib.entity.GenericEnergyReceiverTileEntity;
 import mcjty.lib.network.Argument;
 import mcjty.lib.varia.Logging;
+import mcjty.rftools.PlayerBuff;
+import mcjty.rftools.playerprops.BuffProperties;
 import mcjty.rftools.blocks.RedstoneMode;
 import mcjty.rftools.blocks.environmental.modules.EnvironmentModule;
 import mcjty.rftools.blocks.teleporter.PlayerName;
@@ -253,9 +255,27 @@ public class EnvironmentalControllerTileEntity extends GenericEnergyReceiverTile
         getEnvironmentModules();
 
         int rfNeeded = getTotalRfPerTick();
-        if (rfNeeded > rf || environmentModules.isEmpty()) {
+        boolean insufficientRf = rfNeeded > rf;
+        if (insufficientRf|| environmentModules.isEmpty()) {
             for (EnvironmentModule module : environmentModules) {
                 module.activate(false);
+            }
+            if (insufficientRf) {
+              List<EntityPlayer> players = new ArrayList<EntityPlayer>(worldObj.playerEntities);
+              for (EntityPlayer player : players) {
+                double py = player.posY;
+                double maxsqdist = radius * radius;
+                if (py >= miny && py <= maxy) {
+                  double px = player.posX;
+                  double pz = player.posZ;
+                  double sqdist = (px-xCoord) * (px-xCoord) + (pz-zCoord) * (pz-zCoord);
+                  if (sqdist < maxsqdist) {
+                    if (isPlayerAffected(player)) {
+                      BuffProperties.addBuff(player, PlayerBuff.BUFF_BLINDNESS, BuffProperties.BUFF_MAXTICKS);
+                    }
+                  }
+                }
+              }
             }
             powerTimeout = 20;
             if (active) {
